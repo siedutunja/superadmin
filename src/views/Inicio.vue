@@ -127,7 +127,7 @@
         this.$router.push('/consultamatriculas')
       },
       iniciarVista() {
-        this.escudoInstitucion = CONFIG.ROOT_ESCUDOS + this.$store.state.escudoInstitucion
+        this.escudoInstitucion = `https://siedutunja.gov.co/home/escudo-tunja.png`
         
 
 
