@@ -19,7 +19,7 @@
     },
     methods: {
       iniciarVista() {
-        this.$router.push('/bienvenida')
+        this.$router.push('/')
       },
       mensajeEmergente(variante, titulo, contenido) {
         this.$bvToast.toast(contenido, { title: titulo, variant: variante, toaster: "b-toaster-top-center", solid: true, autoHideDelay: 4000, appendToast: false })

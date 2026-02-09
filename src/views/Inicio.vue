@@ -128,6 +128,16 @@
       },
       iniciarVista() {
         this.escudoInstitucion = CONFIG.ROOT_ESCUDOS + this.$store.state.escudoInstitucion
+        
+
+
+
+
+        this.$store.commit('set', ['nombreInstitucion', 'INSTITUCIÓN EDUCATIVA DE PRUEBAS'])
+        this.$store.commit('set', ['sectorInstitucion', 1])
+        this.$store.commit('set', ['nitInstitucion', '901.000.001'])
+        this.$store.commit('set', ['aLectivo', 2026])
+        this.$store.commit('set', ['daneInstitucion', '901.000.001'])
       }
     },
     beforeMount() {
