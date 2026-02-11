@@ -210,6 +210,12 @@ function configRoutes () {
           name: 'VerMensajes',
           component: () => import('@/views/mensajes/VerMensajes')
         },
+            // 2026-02-09
+              {
+                path: 'ciudades',
+                name: 'Búsqueda Ciudades',
+                component: () => import('@/views/busqueda/ciudades')
+              },
       ]
     },
     // 2022-07-20

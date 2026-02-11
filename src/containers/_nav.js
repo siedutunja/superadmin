@@ -120,6 +120,14 @@ let menu = []
       indice++
       menu[0]._children[indice].items.push({ name: 'Desarrollo Institucional', to: '/carguedocumentos'})
     }
+
+    // BÚSQUEDA
+    menu[0]._children.push({
+      _name: 'CSidebarNavItem',
+      name: 'Búsqueda de Ciudades',
+      to: '/ciudades',
+      icon: 'cilLocationPin'
+    });
 /*
 let menu = []
 let token = sessionStorage.getItem('token')
