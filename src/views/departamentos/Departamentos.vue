@@ -5,16 +5,54 @@
     <div v-if="loading">Cargando...</div>
     <div v-if="error" style="color:red">Error: {{ error }}</div>
 
+    <!-- FILTROS -->
+    <b-row class="mb-3">
+      <b-col lg="4">
+        <b-form-group label="Región">
+          <b-form-select
+            v-model="idRegion"
+            :options="comboRegiones"
+            @change="onSeleccionarRegion"
+          >
+            <template #first>
+              <option :value="null">Todas las regiones</option>
+            </template>
+          </b-form-select>
+        </b-form-group>
+      </b-col>
+
+      <b-col lg="4">
+        <b-form-group label="Departamento">
+          <b-form-select
+            v-model="idDepartamento"
+            :options="comboDepartamentos"
+            @change="applyFilters"
+            :disabled="!idRegion"
+          >
+            <template #first>
+              <option :value="null">Todos los departamentos</option>
+            </template>
+          </b-form-select>
+        </b-form-group>
+      </b-col>
+    </b-row>
+
+    <!-- TABLA -->
     <vue-good-table
-      v-if="!loading && rows.length>0"
+      v-if="!loading && filteredRows.length"
       :columns="columns"
-      :rows="rows"
-      :pagination-options="{enabled: true, perPage: 10}"
-      :search-options="{enabled: true}"
+      :rows="filteredRows"
+      :pagination-options="{ enabled: true, perPage: 10 }"
+      :search-options="{ enabled: true }"
     >
       <template slot="table-row" slot-scope="props">
         <span v-if="props.column.field === 'actions'">
-          <button class="btn btn-sm btn-primary" @click="openDetail(props.row)">Ver</button>
+          <button
+            class="btn btn-sm btn-primary"
+            @click="openDetail(props.row)"
+          >
+            Ver
+          </button>
         </span>
         <span v-else>
           {{ props.formattedRow[props.column.field] }}
@@ -22,17 +60,45 @@
       </template>
     </vue-good-table>
 
-    <div v-if="!loading && rows.length===0 && !error">No hay datos para mostrar.</div>
- 
-    <div v-if="showModal" class="modal-backdrop">
+    <div v-if="!loading && !filteredRows.length && !error">
+      No hay datos para mostrar.
+    </div>
+
+    <!-- MODAL -->
+    <div v-if="showModal" class="modal-backdrop" @click.self="closeModal">
       <div class="modal-card">
-        <h3>{{ selected.name }}</h3>
-        <p v-if="selected.description">{{ selected.description }}</p>
-        <p v-else-if="selected._description">{{ selected._description }}</p>
-        <p v-else-if="selected._full && selected._full.description">{{ selected._full.description }}</p>
-        <p v-else>Sin descripción disponible.</p>
-        <div style="margin-top:12px;text-align:right">
-          <button class="btn btn-secondary" @click="closeModal">Cerrar</button>
+        <div class="modal-body">
+          <h3>{{ selected.name }}</h3>
+
+          <p v-if="selected.description">
+            {{ selected.description }}
+          </p>
+          <p v-else-if="selected._description">
+            {{ selected._description }}
+          </p>
+          <p v-else>
+            Sin descripción disponible.
+          </p>
+
+          <hr />
+
+          <h4>Ciudades</h4>
+
+          <div v-if="loadingCities">Cargando ciudades...</div>
+
+          <ul v-else-if="cities.length">
+            <li v-for="c in cities" :key="c.id">
+              {{ c.name }}
+            </li>
+          </ul>
+
+          <p v-else>No hay ciudades para este departamento.</p>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" @click="closeModal">
+            Cerrar
+          </button>
         </div>
       </div>
     </div>
@@ -48,44 +114,53 @@ import 'vue-good-table/dist/vue-good-table.css'
 export default {
   name: 'Departamentos',
   components: { VueGoodTable },
+
   data () {
     return {
       loading: false,
       error: null,
+
       rows: [],
-      
+      filteredRows: [],
+
       columns: [
         { label: 'ID', field: 'id', sortable: true },
-        { label: 'Name', field: 'name', sortable: true },
-        { label: 'CityCapitalId', field: 'cityCapitalId', sortable: true },
-        { label: 'Municipalities', field: 'municipalities', sortable: true },
-        { label: 'Surface', field: 'surface', sortable: true },
-        { label: 'Population', field: 'population', sortable: true },
-        { label: 'PhonePrefix', field: 'phonePrefix', sortable: true },
-        { label: 'CountryId', field: 'countryId', sortable: true },
+        { label: 'Nombre', field: 'name', sortable: true },
+        { label: 'Capital ID', field: 'cityCapitalId' },
+        { label: 'Municipios', field: 'municipalities' },
+        { label: 'Superficie', field: 'surface' },
+        { label: 'Población', field: 'population' },
+        { label: 'Prefijo', field: 'phonePrefix' },
+        { label: 'País', field: 'countryId' },
         { label: 'Acciones', field: 'actions' }
       ],
+
       endpoint: '/api/v1/Department',
+
+      // filtros
+      idRegion: null,
+      idDepartamento: null,
+      comboRegiones: [],
+      comboDepartamentos: [],
+
+      // modal
       showModal: false,
-      selected: null
+      selected: null,
+      cities: [],
+      loadingCities: false
     }
   },
+
   methods: {
     async fetch () {
       this.loading = true
       this.error = null
+
       try {
         const url = ApiColombia.resolve(this.endpoint)
         const res = await axios.get(url)
-        let data = res.data
-        
-        if (data && data.data) data = data.data
-        if (data && data.results) data = data.results
-        if (!Array.isArray(data)) {
-          if (typeof data === 'object') data = [data]
-          else data = []
-        }
-        
+        const data = Array.isArray(res.data) ? res.data : []
+
         this.rows = data.map(d => ({
           id: d.id,
           name: d.name,
@@ -95,40 +170,127 @@ export default {
           population: d.population,
           phonePrefix: d.phonePrefix,
           countryId: d.countryId,
-          
           _full: d
         }))
+
+        this.filteredRows = this.rows
       } catch (err) {
-        this.error = (err && err.message) ? err.message : err
+        this.error = err.message || err
         this.rows = []
       } finally {
         this.loading = false
       }
     },
-    buildColumns (rows) {
-      
-      return this.columns
+
+    async cargarRegiones () {
+      const res = await axios.get(
+        'https://api-colombia.com/api/v1/Region'
+      )
+
+      this.comboRegiones = res.data.map(r => ({
+        value: r.id,
+        text: r.name
+      }))
     },
-    
-    openDetail (row) {
-            this.selected = row._full || row
+
+    async onSeleccionarRegion () {
+      this.idDepartamento = null
+      this.comboDepartamentos = []
+
+      const res = await axios.get(
+        `https://api-colombia.com/api/v1/Region/${this.idRegion}/departments`
+      )
+
+      this.comboDepartamentos = res.data.map(d => ({
+        value: d.id,
+        text: d.name
+      }))
+
+      this.applyFilters()
+    },
+
+    applyFilters () {
+      this.filteredRows = this.rows.filter(r => {
+        const matchRegion = this.idRegion
+          ? r._full.regionId === this.idRegion
+          : true
+
+        const matchDepartment = this.idDepartamento
+          ? r.id === this.idDepartamento
+          : true
+
+        return matchRegion && matchDepartment
+      })
+    },
+
+    async openDetail (row) {
+      this.selected = row._full || row
       this.showModal = true
+      this.loadingCities = true
+      this.cities = []
+
+      try {
+        const res = await axios.get(
+          `https://api-colombia.com/api/v1/Department/${this.selected.id}/cities`
+        )
+        this.cities = res.data
+      } catch {
+        this.cities = []
+      } finally {
+        this.loadingCities = false
+      }
     },
+
     closeModal () {
       this.showModal = false
       this.selected = null
+      this.cities = []
     }
   },
+
   mounted () {
     this.fetch()
+    this.cargarRegiones()
   }
 }
 </script>
 
 <style scoped>
-.departamentos-view { padding: 12px }
-input { padding: 6px }
-button { padding: 6px 10px }
-.modal-backdrop { position: fixed; left:0; top:0; right:0; bottom:0; background: #000; opacity: 0.95; display:flex; align-items:center; justify-content:center; z-index:99999; pointer-events: auto }
-.modal-card { background: #fff; padding:18px; border-radius:8px; max-width:680px; width:90%; box-shadow:0 8px 30px rgba(0,0,0,0.6); z-index:100000 }
+.departamentos-view {
+  padding: 12px;
+}
+
+.modal-backdrop { 
+  position: fixed; 
+  inset: 0;
+  background: #000;
+  opacity: 0.95;
+  z-index: 99999;
+  overflow-y: auto;   /* ✅ SCROLL AQUÍ */
+}
+
+.modal-card { 
+  background: #fff; 
+  padding: 18px; 
+  border-radius: 8px; 
+  max-width: 680px; 
+  width: 90%; 
+  margin: 40px auto;  /* ✅ CENTRADO SIN FLEX */
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+}
+
+/* Contenido con scroll */
+.modal-body {
+  padding: 18px;
+}
+
+
+/* Footer fijo abajo */
+.modal-footer {
+  margin-top: 12px;
+  text-align: right;
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+
 </style>
