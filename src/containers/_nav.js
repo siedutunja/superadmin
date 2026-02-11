@@ -120,6 +120,18 @@ let menu = []
       indice++
       menu[0]._children[indice].items.push({ name: 'Desarrollo Institucional', to: '/carguedocumentos'})
     }
+
+    // UBICACION - Departamentos
+    menu[0]._children.push(
+      {
+        _name: 'CSidebarNavDropdown',
+        name: 'Ubicación',
+        icon: 'cilMap',
+        items: []
+      }
+    )
+    indice++
+    menu[0]._children[indice].items.push({ name: 'Departamentos', to: '/departamentos'})
 /*
 let menu = []
 let token = sessionStorage.getItem('token')

@@ -210,6 +210,12 @@ function configRoutes () {
           name: 'VerMensajes',
           component: () => import('@/views/mensajes/VerMensajes')
         },
+        // 2026-02-09 Departamentos
+        {
+          path: 'departamentos',
+          name: 'Departamentos',
+          component: () => import('@/views/departamentos/Departamentos')
+        },
       ]
     },
     // 2022-07-20
