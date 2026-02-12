@@ -25,6 +25,9 @@
                 </CRow>
               </CCardFooter>
             </CCard>
+
+
+            
             <!--
             <b-card-group deck class="mt-5">
               <b-card border-variant="light" class="text-center linkini" @click="irInstituciones">
@@ -87,6 +90,8 @@
               </b-card>
             </b-card-group>
             -->
+
+
           </CCardBody>
         </CCard>
       </CCol>
