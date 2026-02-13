@@ -132,6 +132,18 @@ let menu = []
     )
     indice++
     menu[0]._children[indice].items.push({ name: 'Departamentos', to: '/departamentos'})
+
+    // Colegios - Bogota
+    menu[0]._children.push(
+      {
+        _name: 'CSidebarNavDropdown',
+        name: 'Colegios',
+        icon: 'cilMap',
+        items: []
+      }
+    )
+    indice++
+    menu[0]._children[indice].items.push({ name: 'Bogotá', to: '/colegios'})    
 /*
 let menu = []
 let token = sessionStorage.getItem('token')

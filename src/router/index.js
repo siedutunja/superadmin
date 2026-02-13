@@ -216,6 +216,12 @@ function configRoutes () {
           name: 'Departamentos',
           component: () => import('@/views/departamentos/Departamentos')
         },
+        // 2026-02-12 Colegios
+        {
+          path: 'colegios',
+          name: 'Colegios',
+          component: () => import('@/views/colegios/Colegios')
+        },
       ]
     },
     // 2022-07-20
