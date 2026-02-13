@@ -1,19 +1,17 @@
 import axios from 'axios'
-
+ 
 const ApiColegios = {
-  BASE_URL: 'https://www.datos.gov.co/resource/d64g-7qfy.json',
+  BASE_URL: 'http://localhost:3000/colegios',
   
-  async getAll (limit = 50000) {
+  async getAll (page = 1, limit = 50000) {
     try {
-      const url = `${this.BASE_URL}?$limit=${limit}`
+      const url = `${this.BASE_URL}?page=${page}&limit=${limit}`
       return axios.get(url)
     } catch (error) {
       console.error('Error fetching colegios:', error)
       throw error
     }
   },
-
-
 }
 
 export default ApiColegios

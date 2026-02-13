@@ -76,14 +76,6 @@
                             <td>{{ selected.tipo_establecimiento }}</td>
                         </tr>
                         <tr>
-                            <td><strong>Correo Electrónico:</strong></td>
-                            <td>{{ selected.correo_electronico }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Número de Sedes:</strong></td>
-                            <td>{{ selected.numero_de_sedes }}</td>
-                        </tr>
-                        <tr>
                             <td><strong>Niveles:</strong></td>
                             <td>{{ selected.niveles }}</td>
                         </tr>
@@ -162,31 +154,40 @@ export default {
     },
 
     methods: {
+        normalizeText(value) {
+            if (value === null || value === undefined) return ''
+            return String(value).trim()
+        },
+
         async fetch() {
             this.loading = true
             this.error = null
 
             try {
                 const res = await ApiColegios.getAll()
-                const data = Array.isArray(res.data) ? res.data : []
+                const data = Array.isArray(res.data?.data) ? res.data.data : []
 
                 this.rows = data.map((d, idx) => ({
-                    nombreestablecimiento: (d.nombreestablecimiento || '').trim(),
-                    secretaria: (d.secretaria || '').trim(),
-                    direccion: (d.direccion || '').trim(),
-                    telefono: (d.telefono || '').trim(),
-                    zona: (d.zona || '').trim(),
-                    tipo_establecimiento: (d.tipo_establecimiento || '').trim(),
-                    correo_electronico: (d.correo_electronico || '').trim(),
-                    numero_de_sedes: (d.numero_de_sedes || '').trim(),
-                    niveles: (d.niveles || '').trim(),
-                    jornada: (d.jornada || '').trim(),
-                    grados: (d.grados || '').trim(),
-                    idiomas: (d.idiomas || '').trim(),
-                    modelos_educativos: (d.modelos_educativos || '').trim(),
-                    calendario: (d.calendario || '').trim(),
-                    codigo_etc: (d.codigo_etc || '').trim(),
-                    a_o: (d.a_o || '').trim(),
+                    nombreestablecimiento: this.normalizeText(d.nombre),
+                    secretaria: this.normalizeText(d.secretaria),
+                    direccion: this.normalizeText(d.direccion),
+                    telefono: this.normalizeText(d.telefono),
+                    zona: this.normalizeText(d.zona),
+                    tipo_establecimiento: this.normalizeText(d.tipo),
+                    correo_electronico: this.normalizeText(d.correo),
+                    numero_de_sedes: this.normalizeText(d.numeroSedes),
+                    niveles: this.normalizeText(d.niveles),
+                    jornada: this.normalizeText(d.jornada),
+                    grados: this.normalizeText(d.grados),
+                    idiomas: this.normalizeText(d.idiomas),
+                    modelos_educativos: this.normalizeText(d.modelosEducativos),
+                    calendario: this.normalizeText(d.calendario),
+                    rector: this.normalizeText(d.rector),
+                    prestadorServicio: this.normalizeText(d.prestadorServicio),
+                    propiedadPlanta: this.normalizeText(d.propiedadPlanta),
+                    resguardo: this.normalizeText(d.resguardo),
+                    matriculaContratada: this.normalizeText(d.matriculaContratada),
+                    ano: this.normalizeText(d.ano),
                     _full: d,
                     _id: idx
                 }))
@@ -245,7 +246,7 @@ export default {
         },
 
         openDetail(row) {
-            this.selected = row._full || row
+            this.selected = row
             this.showModal = true
         },
 
